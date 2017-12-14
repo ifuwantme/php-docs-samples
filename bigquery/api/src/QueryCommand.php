@@ -60,16 +60,10 @@ EOF
                 'If omitted then the current gcloud project is assumed. '
             )
             ->addOption(
-                'sync',
+                'legacy-sql',
                 null,
                 InputOption::VALUE_NONE,
-                'run the query syncronously'
-            )
-            ->addOption(
-                'standard-sql',
-                null,
-                InputOption::VALUE_NONE,
-                'run the query using standard SQL instead of legacy SQL syntax'
+                'run the query using legacy SQL instead of standard SQL syntax'
             )
         ;
     }
@@ -92,17 +86,10 @@ EOF
         }
 
         try {
-            if ($input->getOption('sync')) {
-                run_query(
-                    $projectId,
-                    $query,
-                    !$input->getOption('standard-sql'));
-            } else {
-                run_query_as_job(
-                    $projectId,
-                    $query,
-                    !$input->getOption('standard-sql'));
-            }
+            run_query(
+                $projectId,
+                $query,
+                !!$input->getOption('legacy-sql'));
         } catch (BadRequestException $e) {
             $response = $e->getServiceException()->getResponse();
             $errorJson = json_decode((string) $response->getBody(), true);

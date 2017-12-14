@@ -1,7 +1,7 @@
 {
     "require": {
-        "google/cloud-bigquery": "^0.2",
-        "google/cloud-storage": "^1.0",
+        "google/cloud-bigquery": "^0.3",
+        "google/cloud-storage": "^1.2",
         "symfony/console": "^3.0"
     },
     "require-dev": {
@@ -26,7 +26,6 @@
             "src/functions/list_projects.php",
             "src/functions/list_tables.php",
             "src/functions/run_query.php",
-            "src/functions/run_query_as_job.php",
             "src/functions/stream_row.php"
         ]
     }

@@ -41,8 +41,10 @@ class QueryCommandTest extends \PHPUnit_Framework_TestCase
             $this->markTestSkipped('No project ID');
         }
 
-        $query = 'SELECT TOP(corpus, 10) as title, COUNT(*) as unique_words ' .
-            'FROM [publicdata:samples.shakespeare]';
+        $query = 'SELECT corpus AS title, COUNT(*) AS unique_words ' .
+            'FROM `publicdata.samples.shakespeare` ' .
+            'GROUP BY title ORDER BY unique_words DESC ' .
+            'LIMIT 10';
 
         $application = new Application();
         $application->add(new QueryCommand());
@@ -64,7 +66,7 @@ class QueryCommandTest extends \PHPUnit_Framework_TestCase
             $this->markTestSkipped('No project ID');
         }
 
-        $query = 'SELECT * FROM [publicdata:samples.shakespeare] LIMIT 0';
+        $query = 'SELECT * FROM `publicdata.samples.shakespeare` LIMIT 0';
 
         $application = new Application();
         $application->add(new QueryCommand());
@@ -92,68 +94,7 @@ class QueryCommandTest extends \PHPUnit_Framework_TestCase
             $this->markTestSkipped('No bigquery table name');
         }
 
-        $query = sprintf('SELECT * FROM [%s.%s] LIMIT 1', $datasetId, $tableId);
-
-        $application = new Application();
-        $application->add(new QueryCommand());
-        $commandTester = new CommandTester($application->get('query'));
-        $commandTester->execute(
-            ['query' => $query, '--project' => $projectId, '--sync'],
-            ['interactive' => false]
-        );
-
-        $this->expectOutputRegex('/Found 1 row\(s\)/');
-    }
-
-    public function testQueryStandardSql()
-    {
-        if (!self::$hasCredentials) {
-            $this->markTestSkipped('No application credentials were found.');
-        }
-        if (!$projectId = getenv('GOOGLE_PROJECT_ID')) {
-            $this->markTestSkipped('No project ID');
-        }
-        if (!$datasetId = getenv('GOOGLE_BIGQUERY_DATASET')) {
-            $this->markTestSkipped('No bigquery dataset name');
-        }
-        if (!$tableId = getenv('GOOGLE_BIGQUERY_TABLE')) {
-            $this->markTestSkipped('No bigquery table name');
-        }
-
         $query = sprintf('SELECT * FROM `%s.%s` LIMIT 1', $datasetId, $tableId);
-
-        $application = new Application();
-        $application->add(new QueryCommand());
-        $commandTester = new CommandTester($application->get('query'));
-        $commandTester->execute(
-            [
-              'query' => $query,
-              '--project' => $projectId,
-              '--sync',
-              '--standard-sql' => true
-            ],
-            ['interactive' => false]
-        );
-
-        $this->expectOutputRegex('/Found 1 row\(s\)/');
-    }
-
-    public function testQueryAsJob()
-    {
-        if (!self::$hasCredentials) {
-            $this->markTestSkipped('No application credentials were found.');
-        }
-        if (!$projectId = getenv('GOOGLE_PROJECT_ID')) {
-            $this->markTestSkipped('No project ID');
-        }
-        if (!$datasetId = getenv('GOOGLE_BIGQUERY_DATASET')) {
-            $this->markTestSkipped('No bigquery dataset name');
-        }
-        if (!$tableId = getenv('GOOGLE_BIGQUERY_TABLE')) {
-            $this->markTestSkipped('No bigquery table name');
-        }
-
-        $query = sprintf('SELECT * FROM [%s.%s] LIMIT 1', $datasetId, $tableId);
 
         $application = new Application();
         $application->add(new QueryCommand());
@@ -166,7 +107,7 @@ class QueryCommandTest extends \PHPUnit_Framework_TestCase
         $this->expectOutputRegex('/Found 1 row\(s\)/');
     }
 
-    public function testQueryAsJobStandardSql()
+    public function testQueryLegasySql()
     {
         if (!self::$hasCredentials) {
             $this->markTestSkipped('No application credentials were found.');
@@ -181,16 +122,16 @@ class QueryCommandTest extends \PHPUnit_Framework_TestCase
             $this->markTestSkipped('No bigquery table name');
         }
 
-        $query = sprintf('SELECT * FROM `%s.%s` LIMIT 1', $datasetId, $tableId);
+        $query = sprintf('SELECT * FROM [%s.%s] LIMIT 1', $datasetId, $tableId);
 
         $application = new Application();
         $application->add(new QueryCommand());
         $commandTester = new CommandTester($application->get('query'));
         $commandTester->execute(
             [
-                'query' => $query,
-                '--project' => $projectId,
-                '--standard-sql' => true
+              'query' => $query,
+              '--project' => $projectId,
+              '--legacy-sql' => true
             ],
             ['interactive' => false]
         );
